@@ -1,5 +1,5 @@
 # 🧠 Recollect AI — Persistent Memory RAG Assistant
-
+🚀 **Live Demo:** https://recollect-ai-nine.vercel.app/
 Recollect AI is a full-stack Retrieval-Augmented Generation (RAG) application designed to act as a personal AI assistant with persistent long-term memory.  
 Unlike traditional chatbots that forget everything between sessions, Recollect AI extracts, stores, and retrieves user-specific facts across conversations using a vector database.
 
@@ -129,16 +129,9 @@ Serve the `frontend/` directory using VS Code Live Server or any static file ser
 - Stores extracted facts as vectors
 - Can be upgraded to LLM-based extraction
 
----
 
-## ⚠️ Current Limitations
-- Rule-based memory extraction
-- Image-only PDFs not supported
-- Single-user memory scope
-- No UI for memory management
-
----
 
 ## 📧 Contact
 Swastik 
 GitHub: https://github.com/SwastiksGautam
+Linkdin: https://www.linkedin.com/in/swastiksharma1/
