@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.api.routes import router
 from backend.vectorstore.pinecone_store import delete_all_vectors
 
-app = FastAPI(title="Universal AI Assistant")
+app = FastAPI(title="AI Assistant")
 
 app.add_middleware(
     CORSMiddleware,
