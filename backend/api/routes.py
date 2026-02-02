@@ -32,13 +32,19 @@ async def upload_pdf(
 
     return {"answer": f"✅ PDF processed successfully\n{result}"}
 
+# backend/api/routes.py
+
 @router.post("/chat")
 def chat_handler(request: ChatRequest):
     user_input = request.input.strip()
-    # Your existing chat logic...
+    
+    # 🌟 ADD THIS LINE: It tells the AI to look for facts in every message
+    from backend.core.ingest import extract_and_store_facts
+    extract_and_store_facts(user_input)
+    
+    # Now generate the answer as usual
     answer = answer_smart(user_input)
     return {"answer": answer}
-
 
 @router.post("/clear-memory")
 def clear_memory():

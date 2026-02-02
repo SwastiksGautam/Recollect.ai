@@ -78,17 +78,17 @@ def answer_smart(query: str, top_k: int = 3):
     return chat_response(context, query)
 
 def extract_and_store_facts(user_input: str):
-    """Uses LLM to extract any personal facts from user input and stores them."""
-    
-    # 1. Ask the AI to identify facts
     extraction_prompt = f"""
-    Analyze the following user input and extract any personal facts they share about themselves 
-    (e.g., name, age, location, schooling, job, hobbies, preferences).
+    Analyze the user's message and extract any new information they share about themselves, 
+    their history, their preferences, or their current activities.
     
-    USER INPUT: "{user_input}"
+    USER MESSAGE: "{user_input}"
     
-    Return the facts as a simple list of sentences starting with "User...". 
-    If no personal facts are found, return exactly: NO_FACTS
+    Output format:
+    - User [fact]
+    - User [fact]
+    
+    If the message is just a question or contains no info about the user, return: NO_FACTS
     """
     
     # Use your existing chat_response logic or a direct client call
