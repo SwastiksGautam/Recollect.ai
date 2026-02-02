@@ -75,27 +75,32 @@ PINECONE_REGION=us-west-2
 ### 3️⃣ Install Dependencies
 pip install -r requirements.txt
 
-## 📁 Project Structure
+
+## 📂 Project Structure
+
+```text
 PREDUSK TECHNOLOGY
 ├── backend/
-│   ├── api/            # API endpoints and route definitions
-│   │   └── routes.py   # Main router for chat and file handling
-│   ├── config/         # System-level configuration
-│   │   └── settings.py # Environment variable management
-│   ├── core/           # Core RAG processing logic
-│   │   └── ingest.py   # Document ingestion and fact extraction
-│   ├── llm/            # OpenAI client configuration
+│   ├── api/                  # API endpoints and route definitions
+│   │   └── routes.py         # Main router for chat and file handling
+│   ├── config/               # System-level configuration
+│   │   └── settings.py       # Environment variable management
+│   ├── core/                 # Core RAG processing logic
+│   │   └── ingest.py         # Document ingestion and fact extraction
+│   ├── llm/                  # OpenAI client configuration
 │   │   └── openai_client.py
-│   ├── utils/          # Non-business logic helper functions
-│   ├── vectorstore/    # Pinecone integration and metadata filters
+│   ├── utils/                # Non-business logic helper functions
+│   ├── vectorstore/          # Pinecone integration and metadata filters
 │   │   └── pinecone_store.py
-│   ├── .env            # Local environment secrets
-│   ├── app.py          # Primary application entry point
-│   └── main.py         # Chatbot core (handles websites & general queries)
+│   ├── .env                  # Local environment secrets
+│   ├── app.py                # Primary application entry point
+│   └── main.py               # Chatbot core (handles websites & general queries)
+│
 └── frontend/
-    ├── index.html      # UI structure
-    ├── script.js       # Client-side logic and API communication
-    └── style.css       # Application styling
+    ├── index.html             # UI structure
+    ├── script.js              # Client-side logic and API communication
+    └── style.css              # Application styling
+```
 
 ### 4️⃣ Run the Application
 
