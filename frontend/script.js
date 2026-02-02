@@ -1,5 +1,10 @@
 let isProcessing = false;
 
+// --- CONFIGURATION ---
+// Ensure this has NO trailing slash. 
+// It points to your live Render backend.
+const BACKEND_URL = "https://recollect-ai.onrender.com";
+
 const pdfInputEl = document.getElementById("pdfInput");
 const filePreview = document.getElementById("filePreview");
 const fileNameDisplay = document.getElementById("fileNameDisplay");
@@ -27,7 +32,7 @@ function addMessage(text, sender) {
     const msg = document.createElement("div");
     msg.classList.add("message", sender);
     msg.innerHTML = `<b>${sender === "user" ? "You" : "AI"}:</b> ${text}`;
-    chat.prepend(msg); // Works with column-reverse CSS
+    chat.prepend(msg); // Newest messages on top
     return msg;
 }
 
@@ -60,19 +65,30 @@ async function send() {
             formData.append("file", pdfFile);
             if (input) formData.append("initial_query", input);
 
-            data = await fetch("http://127.0.0.1:8000/upload-pdf", {
+            // Fetch to /upload-pdf on Render
+            data = await fetch(`${BACKEND_URL}/upload-pdf`, {
                 method: "POST",
                 body: formData
             }).then(res => res.json());
+
         } else {
-            data = await fetch("https://recollect-ai.onrender.com/", {
+            // Fetch to /chat on Render (Explicitly hitting the /chat endpoint)
+            data = await fetch(`${BACKEND_URL}/chat`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ input })
             }).then(res => res.json());
         }
-        thinkingMsg.innerHTML = `<b>AI:</b> ${data.answer}`;
+
+        // Check if data.answer exists to avoid "undefined"
+        if (data && data.answer) {
+            thinkingMsg.innerHTML = `<b>AI:</b> ${data.answer}`;
+        } else {
+            thinkingMsg.innerHTML = `<b>AI:</b> Received a response, but no answer was found.`;
+        }
+
     } catch (err) {
+        console.error("Fetch Error:", err);
         thinkingMsg.innerHTML = `<b>AI:</b> Error: Could not connect to backend.`;
     } finally {
         isProcessing = false;
