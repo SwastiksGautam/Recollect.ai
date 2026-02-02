@@ -94,10 +94,14 @@ inputEl.addEventListener("keydown", (e) => {
 });
 
 window.onload = async () => {
+    console.log("Initializing new session...");
     try {
-        await fetch(`${BACKEND_URL}/clear-memory`, { method: "POST" });
-        console.log("Memory cleared.");
+        const response = await fetch(`${BACKEND_URL}/clear-memory`, { 
+            method: "POST" 
+        });
+        const data = await response.json();
+        console.log("Session Reset:", data.answer);
     } catch (err) {
-        console.error("Auto-clear failed:", err);
+        console.warn("Auto-clear failed. Backend might be waking up...", err);
     }
 };
