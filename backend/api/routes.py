@@ -30,12 +30,15 @@ async def upload_pdf(file: UploadFile = File(...), initial_query: str = Form(Non
 def chat_handler(request: ChatRequest):
     user_input = request.input.strip()
     
+    from backend.vectorstore.pinecone_store import store_chunks
+    store_chunks([f"User previously asked/said: {user_input}"], namespace="user_facts")
+    
     from backend.core.ingest import extract_and_store_facts
     extract_and_store_facts(user_input)
     
     current_file = request.current_file
-    
     answer = answer_smart(user_input, current_file=current_file)
+    
     return {"answer": answer}
 
 @router.post("/clear-memory")
