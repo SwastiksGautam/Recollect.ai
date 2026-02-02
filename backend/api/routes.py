@@ -26,20 +26,16 @@ async def upload_pdf(file: UploadFile = File(...), initial_query: str = Form(Non
 
     return {"answer": f"✅ PDF processed successfully\n{result}"}
 
-# backend/api/routes.py
-
 @router.post("/chat")
 def chat_handler(request: ChatRequest):
     user_input = request.input.strip()
     
-    from backend.core.ingest import extract_and_store_facts, answer_smart
+    from backend.core.ingest import extract_and_store_facts
     extract_and_store_facts(user_input)
     
-   
-    current_file = getattr(request, 'current_file', None)
+    current_file = request.current_file
     
     answer = answer_smart(user_input, current_file=current_file)
-    
     return {"answer": answer}
 
 @router.post("/clear-memory")

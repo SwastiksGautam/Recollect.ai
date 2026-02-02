@@ -51,9 +51,10 @@ def ingest_pdf(file_path: str, chunk_size: int = 500, overlap: int = 50, filenam
     store_chunks(chunks, filename=filename) 
     return f"{len(chunks)} chunks stored."
 
-# 🌟 Filter retrieval by current_file
+
 def answer_smart(query: str, top_k: int = 3, current_file: str = None):
     from backend.vectorstore.pinecone_store import retrieve_chunks
+    
     chunks = retrieve_chunks(query, top_k=top_k, current_file=current_file)
 
     context_chunks = []
