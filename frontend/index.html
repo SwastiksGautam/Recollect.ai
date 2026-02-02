@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Universal AI Assistant</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Universal AI Assistant</h2>
+        <div id="chat" class="chat-container"></div>
+
+        <div class="input-wrapper">
+            <div id="filePreview" class="file-preview" style="display:none;">
+                <span id="fileNameDisplay"></span>
+                <button id="cancelFile">✕</button>
+            </div>
+
+            <textarea id="input" placeholder="Type a message or attach a PDF..."></textarea>
+            <button id="addFile" title="Upload PDF">+</button>
+            <button id="sendBtn">Send</button>
+            <input type="file" id="pdfInput" accept=".pdf" style="display:none">
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
