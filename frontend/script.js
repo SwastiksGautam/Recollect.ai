@@ -1,9 +1,9 @@
 let isProcessing = false;
+let activeFileName = null; // 🌟 Track the current file
 
-// --- CONFIGURATION ---
-// Ensure this has NO trailing slash. 
-// It points to your live Render backend.
-const BACKEND_URL = "https://recollect-ai.onrender.com";
+const BACKEND_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+    ? "http://127.0.0.1:8000"
+    : "https://recollect-ai.onrender.com";
 
 const pdfInputEl = document.getElementById("pdfInput");
 const filePreview = document.getElementById("filePreview");
@@ -11,47 +11,41 @@ const fileNameDisplay = document.getElementById("fileNameDisplay");
 const cancelFileBtn = document.getElementById("cancelFile");
 const inputEl = document.getElementById("input");
 
-// 1. Handle File Selection UI
 document.getElementById("addFile").addEventListener("click", () => pdfInputEl.click());
 
 pdfInputEl.addEventListener("change", () => {
     if (pdfInputEl.files.length > 0) {
-        fileNameDisplay.innerText = `📄 ${pdfInputEl.files[0].name} (Ready)`;
+        activeFileName = pdfInputEl.files[0].name; // 🌟 Capture name
+        fileNameDisplay.innerText = `📄 ${activeFileName} (Ready)`;
         filePreview.style.display = "flex";
     }
 });
 
 cancelFileBtn.addEventListener("click", () => {
     pdfInputEl.value = "";
+    activeFileName = null; // 🌟 Reset name
     filePreview.style.display = "none";
 });
 
-// 2. Message Display
 function addMessage(text, sender) {
     const chat = document.getElementById("chat");
     const msg = document.createElement("div");
     msg.classList.add("message", sender);
     msg.innerHTML = `<b>${sender === "user" ? "You" : "AI"}:</b> ${text}`;
-    chat.prepend(msg); // Newest messages on top
+    chat.prepend(msg);
     return msg;
 }
 
-// 3. Unified Send Logic
 async function send() {
     if (isProcessing) return;
-
     const input = inputEl.value.trim();
     const pdfFile = pdfInputEl.files[0];
-
     if (!input && !pdfFile) return;
 
     isProcessing = true;
-
-    // UI Feedback
     if (input) addMessage(input, "user");
     if (pdfFile) addMessage(`Attached PDF: ${pdfFile.name}`, "user");
 
-    // Reset Inputs
     inputEl.value = "";
     pdfInputEl.value = "";
     filePreview.style.display = "none";
@@ -65,27 +59,23 @@ async function send() {
             formData.append("file", pdfFile);
             if (input) formData.append("initial_query", input);
 
-            // Fetch to /upload-pdf on Render
             data = await fetch(`${BACKEND_URL}/upload-pdf`, {
                 method: "POST",
                 body: formData
             }).then(res => res.json());
 
         } else {
-            // Fetch to /chat on Render (Explicitly hitting the /chat endpoint)
             data = await fetch(`${BACKEND_URL}/chat`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ input })
+                body: JSON.stringify({
+                    input: input,
+                    current_file: activeFileName // 🌟 Send filename to backend
+                })
             }).then(res => res.json());
         }
 
-        // Check if data.answer exists to avoid "undefined"
-        if (data && data.answer) {
-            thinkingMsg.innerHTML = `<b>AI:</b> ${data.answer}`;
-        } else {
-            thinkingMsg.innerHTML = `<b>AI:</b> Received a response, but no answer was found.`;
-        }
+        thinkingMsg.innerHTML = `<b>AI:</b> ${data.answer || "No response."}`;
 
     } catch (err) {
         console.error("Fetch Error:", err);
@@ -95,7 +85,6 @@ async function send() {
     }
 }
 
-// 4. Event Listeners for sending
 document.getElementById("sendBtn").addEventListener("click", send);
 inputEl.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -104,11 +93,10 @@ inputEl.addEventListener("keydown", (e) => {
     }
 });
 
-// Clear memory automatically when the page is refreshed
 window.onload = async () => {
     try {
         await fetch(`${BACKEND_URL}/clear-memory`, { method: "POST" });
-        console.log("Memory cleared for new session.");
+        console.log("Memory cleared.");
     } catch (err) {
         console.error("Auto-clear failed:", err);
     }

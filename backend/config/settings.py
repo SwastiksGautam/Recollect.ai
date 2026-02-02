@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import os
 from pathlib import Path
 
-env_path = Path(__file__).parent.parent / ".env"  # Points to backend/.env
+env_path = Path(__file__).parent.parent / ".env"  
 load_dotenv(dotenv_path=env_path)
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")

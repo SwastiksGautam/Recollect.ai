@@ -31,7 +31,7 @@ def store_chunks(chunks: list, namespace: str = "default"):
     for chunk in chunks:
         vec = create_embedding(chunk)
         index.upsert([{
-            "id": str(uuid.uuid4()), # Unique ID prevents overwriting
+            "id": str(uuid.uuid4()), 
             "values": vec,
             "metadata": {"text": chunk}
         }], namespace=namespace)
@@ -40,15 +40,13 @@ def retrieve_chunks(query: str, top_k=5):
     index = get_index()
     embedding = create_embedding(query)
 
-    # 1. Search in user_facts namespace
     fact_results = index.query(
         vector=embedding,
         top_k=3,
         include_metadata=True,
-        namespace="user_facts" # <--- Look here!
+        namespace="user_facts" 
     )
 
-    # 2. Search in default namespace (PDFs/Websites)
     doc_results = index.query(
         vector=embedding,
         top_k=top_k,
@@ -66,6 +64,5 @@ def delete_all_vectors():
         index.delete(delete_all=True)
         print("🔥 Pinecone index cleared")
     except NotFoundException:
-        # Happens when no namespace exists yet
-        print("ℹ️ Pinecone index empty — nothing to delete")
+        print(" Pinecone index empty — nothing to delete")
 

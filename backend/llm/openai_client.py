@@ -5,10 +5,9 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 def create_embedding(text: str):
     """Generates an embedding vector for the given text."""
-    # Ensure text is stripped and not empty
     text = text.replace("\n", " ").strip()
     if not text:
-        return [0.0] * 1536 # Return zero vector for empty text
+        return [0.0] * 1536 
         
     response = client.embeddings.create(model=EMBEDDING_MODEL, input=text)
     return response.data[0].embedding
@@ -17,7 +16,6 @@ def create_embedding(text: str):
 def chat_response(context: str, query: str):
     """Generates a smart, hybrid response."""
     
-    # We always use the same system prompt to keep the AI's identity stable
     system_prompt = (
     "You are a helpful AI assistant with long-term memory.\n"
     "The DOCUMENT CONTEXT may contain:\n"
@@ -31,9 +29,6 @@ def chat_response(context: str, query: str):
     "4. Only say 'I don't have that information' if the context truly lacks it."
 )
 
-
-    # We combine context and query into one flow
-    # If context is empty, we just pass an empty string so the LLM knows there's no data
     user_prompt = f"""
 MEMORY CONTEXT (User facts are always true):
 {context if context.strip() else "No specific document context found for this query."}
@@ -53,7 +48,7 @@ INSTRUCTIONS:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ],
-        temperature=0.7 # Increased to 0.7 to allow for more 'natural' and creative general answers
+        temperature=0.7 
     )
     
     return response.choices[0].message.content.strip()
