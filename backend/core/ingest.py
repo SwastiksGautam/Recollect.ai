@@ -1,6 +1,6 @@
 import tiktoken
 from PyPDF2 import PdfReader
-
+from backend.llm.openai_client import client
 from backend.vectorstore.pinecone_store import store_chunks, retrieve_chunks
 from backend.llm.openai_client import chat_response, create_embedding
 from backend.config.settings import CHAT_MODEL
