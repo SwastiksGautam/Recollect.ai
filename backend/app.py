@@ -10,7 +10,11 @@ app = FastAPI(title="Universal AI Assistant")
 # 🌍 CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://recollect-ai-nine.vercel.app", # Fixed: Added https://
+        "http://127.0.0.1:5500",               # Recommended: Keeps local testing working
+        "http://localhost:5500"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
