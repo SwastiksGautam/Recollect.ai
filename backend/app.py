@@ -19,10 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# @app.on_event("startup")
-# def clear_vector_db():
-#     delete_all_vectors()
-#     print(" Pinecone vector DB cleared on startup")
+
 
 app.include_router(router)
 
