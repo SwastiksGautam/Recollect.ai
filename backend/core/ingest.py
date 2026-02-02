@@ -77,31 +77,43 @@ def answer_smart(query: str, top_k: int = 3):
 
     return chat_response(context, query)
 
-
 def extract_and_store_facts(user_input: str):
-    facts = []
+    """Uses LLM to extract any personal facts from user input and stores them."""
+    
+    # 1. Ask the AI to identify facts
+    extraction_prompt = f"""
+    Analyze the following user input and extract any personal facts they share about themselves 
+    (e.g., name, age, location, schooling, job, hobbies, preferences).
+    
+    USER INPUT: "{user_input}"
+    
+    Return the facts as a simple list of sentences starting with "User...". 
+    If no personal facts are found, return exactly: NO_FACTS
+    """
+    
+    # Use your existing chat_response logic or a direct client call
+    ai_response = client.chat.completions.create(
+        model=CHAT_MODEL,
+        messages=[{"role": "system", "content": "You are a fact extraction tool."},
+                  {"role": "user", "content": extraction_prompt}]
+    ).choices[0].message.content.strip()
 
-    # Name
-    match = re.search(r"(i am|i'm|my name is)\s+([A-Za-z]+)", user_input, re.I)
-    if match:
-        facts.append(f"User name is {match.group(2)}")
+    if "NO_FACTS" in ai_response:
+        return
 
-    # Age
-    match = re.search(r"(\d{1,3})\s*(years|year|yrs)", user_input, re.I)
-    if match:
-        facts.append(f"User age is {match.group(1)}")
-
-    # City
-    if "rampur" in user_input.lower():
-        facts.append("User city is Rampur Bushahr")
-
-    # State
-    if "hp" in user_input.lower() or "himachal" in user_input.lower():
-        facts.append("User state is Himachal Pradesh")
+    # 2. Split AI response into individual facts
+    facts = [f.strip() for f in ai_response.split("\n") if f.strip().startswith("User")]
 
     if facts:
-        # Retrieve existing facts to prevent duplicates
-        existing_facts = retrieve_chunks("user facts", top_k=50)
-        new_facts = [f for f in facts if f"[USER FACT]\n{f}" not in existing_facts]
+        # 3. Retrieve existing facts to prevent exact duplicates
+        existing_facts = retrieve_chunks("user facts", top_k=20)
+        
+        new_facts = []
+        for f in facts:
+            fact_tagged = f"[USER FACT]\n{f}"
+            if fact_tagged not in existing_facts:
+                new_facts.append(fact_tagged)
+
         if new_facts:
-            store_chunks([f"[USER FACT]\n{fact}" for fact in new_facts], namespace="user_facts")
+            store_chunks(new_facts, namespace="user_facts")
+            print(f"✅ AI extracted and stored {len(new_facts)} new facts.")

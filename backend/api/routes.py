@@ -38,3 +38,10 @@ def chat_handler(request: ChatRequest):
     # Your existing chat logic...
     answer = answer_smart(user_input)
     return {"answer": answer}
+
+
+@router.post("/clear-memory")
+def clear_memory():
+    from backend.vectorstore.pinecone_store import delete_all_vectors
+    delete_all_vectors()
+    return {"answer": "Memory cleared! I'm ready for a fresh start."}

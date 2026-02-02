@@ -103,3 +103,13 @@ inputEl.addEventListener("keydown", (e) => {
         send();
     }
 });
+
+// Clear memory automatically when the page is refreshed
+window.onload = async () => {
+    try {
+        await fetch(`${BACKEND_URL}/clear-memory`, { method: "POST" });
+        console.log("Memory cleared for new session.");
+    } catch (err) {
+        console.error("Auto-clear failed:", err);
+    }
+};
