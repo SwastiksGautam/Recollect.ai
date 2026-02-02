@@ -13,8 +13,6 @@ def count_tokens(text: str) -> int:
     return len(enc.encode(text))
 
 
-
-# Token-based chunking
 def chunk_text_by_tokens(text: str, max_tokens=250, overlap=30):
     enc = tiktoken.get_encoding("cl100k_base") 
     tokens = enc.encode(text)
@@ -27,13 +25,13 @@ def chunk_text_by_tokens(text: str, max_tokens=250, overlap=30):
         start += max_tokens - overlap
     return chunks
 
-
-def store_content(text: str, chunk_size: int = 500, overlap: int = 50, filename: str = "unknown"):
+def store_content(text: str, chunk_size: int = 500, overlap: int = 50, filename: str = "unknown", session_id: str = "default"):
     chunks = chunk_text_by_tokens(text, max_tokens=chunk_size, overlap=overlap)
-    store_chunks(chunks, filename=filename) 
+
+    store_chunks(chunks, namespace=f"user_{session_id}", filename=filename) 
     return f"{len(chunks)} chunks stored."
 
-def ingest_pdf(file_path: str, chunk_size: int = 500, overlap: int = 50, filename: str = "unknown"):
+def ingest_pdf(file_path: str, chunk_size: int = 500, overlap: int = 50, filename: str = "unknown", session_id: str = "default"):
     reader = PdfReader(file_path)
     full_text = ""
     for page in reader.pages:
@@ -47,15 +45,14 @@ def ingest_pdf(file_path: str, chunk_size: int = 500, overlap: int = 50, filenam
         return "Error: No readable text found."
 
     chunks = chunk_text_by_tokens(full_text, max_tokens=chunk_size, overlap=overlap)
-    from backend.vectorstore.pinecone_store import store_chunks
-    store_chunks(chunks, filename=filename) 
+
+    store_chunks(chunks, namespace=f"user_{session_id}", filename=filename) 
     return f"{len(chunks)} chunks stored."
 
-
-def answer_smart(query: str, top_k: int = 3, current_file: str = None):
+def answer_smart(query: str, top_k: int = 3, current_file: str = None, session_id: str = "default"):
     from backend.vectorstore.pinecone_store import retrieve_chunks
     
-    chunks = retrieve_chunks(query, top_k=top_k, current_file=current_file)
+    chunks = retrieve_chunks(query, top_k=top_k, current_file=current_file, session_id=session_id)
 
     context_chunks = []
     tokens_so_far = count_tokens(query)
@@ -69,8 +66,7 @@ def answer_smart(query: str, top_k: int = 3, current_file: str = None):
     context = "\n\n".join(context_chunks)
     return chat_response(context, query)
 
-
-def extract_and_store_facts(user_input: str):
+def extract_and_store_facts(user_input: str, session_id: str = "default"):
     extraction_prompt = f"""
     Extract every single detail from this message, including:
     - Personal facts (Name, age, location)
@@ -94,7 +90,7 @@ def extract_and_store_facts(user_input: str):
     facts = [f.strip() for f in ai_response.split("\n") if f.strip().startswith("User")]
 
     if facts:
-        existing_facts = retrieve_chunks("user facts", top_k=20)
+        existing_facts = retrieve_chunks("user facts", top_k=20, session_id=session_id)
         
         new_facts = []
         for f in facts:
@@ -103,5 +99,5 @@ def extract_and_store_facts(user_input: str):
                 new_facts.append(fact_tagged)
 
         if new_facts:
-            store_chunks(new_facts, namespace="user_facts")
-            print(f" AI extracted and stored {len(new_facts)} new facts.")
+            store_chunks(new_facts, namespace=f"user_{session_id}")
+            print(f" AI extracted and stored {len(new_facts)} new facts for session {session_id}.")
