@@ -38,11 +38,10 @@ async def upload_pdf(
 def chat_handler(request: ChatRequest):
     user_input = request.input.strip()
     
-    # 🌟 ADD THIS LINE: It tells the AI to look for facts in every message
+    # 🌟 Rely on the AI to decide if it's worth remembering
     from backend.core.ingest import extract_and_store_facts
     extract_and_store_facts(user_input)
     
-    # Now generate the answer as usual
     answer = answer_smart(user_input)
     return {"answer": answer}
 

@@ -78,17 +78,17 @@ def answer_smart(query: str, top_k: int = 3):
     return chat_response(context, query)
 
 def extract_and_store_facts(user_input: str):
+    # Change your prompt to this:
     extraction_prompt = f"""
-    Analyze the user's message and extract any new information they share about themselves, 
-    their history, their preferences, or their current activities.
-    
+    Extract every single detail from this message, including:
+    - Personal facts (Name, age, location)
+    - Interests/Actions (Games played, hobbies)
+    - Intent/Queries (What the user is currently asking about or interested in)
+
     USER MESSAGE: "{user_input}"
-    
-    Output format:
-    - User [fact]
-    - User [fact]
-    
-    If the message is just a question or contains no info about the user, return: NO_FACTS
+
+    Format: - User [detail]
+    If no info exists, return: NO_FACTS
     """
     
     # Use your existing chat_response logic or a direct client call
