@@ -9,6 +9,7 @@ router = APIRouter()
 class ChatRequest(BaseModel):
     input: str
     current_file: str | None = None
+    session_id: str
 
 @router.post("/upload-pdf")
 async def upload_pdf(file: UploadFile = File(...), initial_query: str = Form(None)):
@@ -30,15 +31,13 @@ async def upload_pdf(file: UploadFile = File(...), initial_query: str = Form(Non
 def chat_handler(request: ChatRequest):
     user_input = request.input.strip()
     
-    from backend.vectorstore.pinecone_store import store_chunks
-    store_chunks([f"User previously asked/said: {user_input}"], namespace="user_facts")
+    # Pass sessionId to extraction and answering logic
+    from backend.core.ingest import extract_and_store_facts, answer_smart
+    extract_and_store_facts(user_input, session_id=request.session_id)
     
-    from backend.core.ingest import extract_and_store_facts
-    extract_and_store_facts(user_input)
-    
-    current_file = request.current_file
-    answer = answer_smart(user_input, current_file=current_file)
-    
+    answer = answer_smart(user_input, 
+                          current_file=request.current_file, 
+                          session_id=request.session_id)
     return {"answer": answer}
 
 @router.post("/clear-memory")

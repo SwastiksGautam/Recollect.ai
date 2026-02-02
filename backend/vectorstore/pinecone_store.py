@@ -39,15 +39,16 @@ def store_chunks(chunks: list, namespace: str = "default", filename: str = "unkn
             }
         }], namespace=namespace)
 
-def retrieve_chunks(query: str, top_k=5, current_file=None): 
+def retrieve_chunks(query: str, top_k=5, current_file=None, session_id="default"): 
     index = get_index()
     embedding = create_embedding(query)
 
+    # 🌟 ONLY search the namespace belonging to THIS session
     fact_results = index.query(
         vector=embedding,
         top_k=3,
         include_metadata=True,
-        namespace="user_facts" 
+        namespace=f"user_{session_id}" 
     )
     search_filter = {"source": {"$eq": current_file}} if current_file else None
 

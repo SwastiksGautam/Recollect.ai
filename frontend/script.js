@@ -1,5 +1,12 @@
 let isProcessing = false;
-let activeFileName = null; // 🌟 Track the current file
+let activeFileName = null;
+
+
+let sessionId = localStorage.getItem("recollect_session_id");
+if (!sessionId) {
+    sessionId = "sess_" + Math.random().toString(36).substring(2, 15);
+    localStorage.setItem("recollect_session_id", sessionId);
+}
 
 const BACKEND_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
     ? "http://127.0.0.1:8000"
@@ -15,7 +22,7 @@ document.getElementById("addFile").addEventListener("click", () => pdfInputEl.cl
 
 pdfInputEl.addEventListener("change", () => {
     if (pdfInputEl.files.length > 0) {
-        activeFileName = pdfInputEl.files[0].name; // 🌟 Capture name
+        activeFileName = pdfInputEl.files[0].name;
         fileNameDisplay.innerText = `📄 ${activeFileName} (Ready)`;
         filePreview.style.display = "flex";
     }
@@ -23,7 +30,7 @@ pdfInputEl.addEventListener("change", () => {
 
 cancelFileBtn.addEventListener("click", () => {
     pdfInputEl.value = "";
-    activeFileName = null; // 🌟 Reset name
+    activeFileName = null;
     filePreview.style.display = "none";
 });
 
@@ -57,6 +64,7 @@ async function send() {
         if (pdfFile) {
             const formData = new FormData();
             formData.append("file", pdfFile);
+            formData.append("session_id", sessionId);
             if (input) formData.append("initial_query", input);
 
             data = await fetch(`${BACKEND_URL}/upload-pdf`, {
@@ -70,7 +78,8 @@ async function send() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     input: input,
-                    current_file: activeFileName // 🌟 Send filename to backend
+                    current_file: activeFileName,
+                    session_id: sessionId
                 })
             }).then(res => res.json());
         }
@@ -94,14 +103,16 @@ inputEl.addEventListener("keydown", (e) => {
 });
 
 window.onload = async () => {
-    console.log("Initializing new session...");
+    console.log("Initializing session:", sessionId);
     try {
-        const response = await fetch(`${BACKEND_URL}/clear-memory`, { 
-            method: "POST" 
+        const response = await fetch(`${BACKEND_URL}/clear-memory`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session_id: sessionId })
         });
         const data = await response.json();
         console.log("Session Reset:", data.answer);
     } catch (err) {
-        console.warn("Auto-clear failed. Backend might be waking up...", err);
+        console.warn("Auto-clear failed.", err);
     }
 };
